@@ -1,0 +1,8 @@
+# VS Code
+.vscode/
+
+# Pliki wygenerowane przez program
+*.csv
+
+# Środowisko virtualne
+.venv/
