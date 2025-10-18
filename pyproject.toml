@@ -1,0 +1,19 @@
+[project]
+name = "sggw-pp"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Michał Wroński",email = "101330063+MichalWronskiMW@users.noreply.github.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests (>=2.32.5,<3.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "sggw_pp", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
