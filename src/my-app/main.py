@@ -11,7 +11,8 @@ def log_time(func):
         print(f"[INFO] Start: {func.__name__} ({datetime.now().strftime('%H:%M:%S')})")
         result = func(*args, **kwargs)
         end = time.time()
-        print(f"[INFO] Koniec: {func.__name__} ({datetime.now().strftime('%H:%M:%S')}), czas: {end - start:.2f}s\n")
+        print(f"[INFO] Koniec: {func.__name__} ({datetime.now().strftime('%H:%M:%S')})
+        , czas: {end - start:.2f}s\n")
         return result
     return wrapper
 

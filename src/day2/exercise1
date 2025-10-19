@@ -1,0 +1,79 @@
+# ===== Zadanie 1 =====
+class Logger:
+    def __enter__(self):
+        print("Start sekcji logowania")
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        print("Koniec sekcji logowania")
+
+
+# Przykład użycia
+with Logger():
+    print("Wewnątrz sekcji logowania")
+
+
+# ===== Zadanie 2 =====
+class FileWriter:
+    def __init__(self, filepath):
+        self.filepath = filepath
+        self.file = None  
+
+    def __enter__(self):
+        self.file = open(self.filepath, 'w', encoding='utf-8')
+        return self.file
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.file:
+            self.file.close()
+        return False
+
+
+# 🔹 Przykład użycia:
+with FileWriter("test.txt") as f:
+    f.write("To jest przykładowy tekst.\n")
+    f.write("Zapisany w bloku with.\n")
+
+print("Zapis zakończony.")
+
+# ===== Zadanie 13 =====
+class FileWriter2(FileWriter):
+    def __exit__(self, exc_type, exc_value, traceback):
+        super().__exit__(exc_type, exc_value, traceback)
+
+        # Jeśli wystąpił wyjątek — wypisz komunikat
+        if exc_type is not None:
+            print(f"Błąd podczas zapisu: {exc_value}")
+
+        # False → wyjątek NIE jest tłumiony
+        return False
+
+
+# 🔹 Przykład użycia
+try:
+    with FileWriter2("test.txt") as f:
+        f.write("Zaczynamy zapis...\n")
+        raise ValueError("Coś poszło nie tak!")  # symulacja błędu
+except Exception as e:
+    print(f"Wyjątek przechwycony poza blokiem: {e}")
+
+# ===== Zadanie 4 =====
+class SafeDivision:
+    def __enter__(self):
+        return self  
+
+    def divide(self, a, b):
+        return a / b 
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        # Jeśli wystąpił wyjątek dzielenia przez zero
+        if exc_type is ZeroDivisionError:
+            print("Nie można dzielić przez zero")
+            return True  
+        return False
+
+
+# 🔹 Przykład użycia:
+with SafeDivision() as sd:
+    print(sd.divide(10, 2))   # poprawne dzielenie
+    print(sd.divide(5, 0))    # wywoła ZeroDivisionError, ale zostanie wytłumiony
+    print("Dalsze działanie programu po błędzie")
