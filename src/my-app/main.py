@@ -3,18 +3,41 @@ import csv
 import requests
 from datetime import datetime
 
-# ===== Dekorator logowania czasu =====
+
+# ===== Ćwiczenie IV - dekorator
 def log_time(func):
     """Dekorator logujący czas działania funkcji."""
     def wrapper(*args, **kwargs):
         start = time.time()
-        print(f"[INFO] Start: {func.__name__} ({datetime.now().strftime('%H:%M:%S')})")
+        print(f"Start: {func.__name__} ({datetime.now().strftime('%H:%M:%S')})")
         result = func(*args, **kwargs)
         end = time.time()
-        print(f"[INFO] Koniec: {func.__name__} ({datetime.now().strftime('%H:%M:%S')})
-        , czas: {end - start:.2f}s\n")
+        print(f"Koniec: {func.__name__} ({datetime.now().strftime('%H:%M:%S')})")
+        print(f"Czas: {end - start:.2f}s\n")
         return result
     return wrapper
+
+
+# ===== Ćwiczenie I – pobieranie pliku + uzupełnienie o nowe wyjątki =====
+def download_csv(url: str, filename: str = "latest.csv") -> str:
+    """Pobiera plik CSV z podanego URL i zapisuje lokalnie."""
+    try:
+        resp = requests.get(url)
+        if resp.status_code == 404:
+            raise NotFoundError(url)
+        elif resp.status_code == 403:
+            raise AccessDeniedError(url)
+        resp.raise_for_status()
+
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(resp.text)
+
+        print(f"Zapisano plik: {filename}")
+        return filename
+
+    except (requests.RequestException, DownloadError) as e:
+        print(f"[ERROR] {e}")
+        return ""
 
 
 # ===== Ćwiczenie II – wyjątki =====
@@ -37,27 +60,6 @@ class AccessDeniedError(DownloadError):
         self.args = (f"Brak dostępu do pliku (HTTP 403): {url}",)
 
 
-# ===== Ćwiczenie I – pobieranie pliku =====
-def download_csv(url: str, filename: str = "latest.csv") -> str:
-    """Pobiera plik CSV z podanego URL i zapisuje lokalnie."""
-    try:
-        resp = requests.get(url)
-        if resp.status_code == 404:
-            raise NotFoundError(url)
-        elif resp.status_code == 403:
-            raise AccessDeniedError(url)
-        resp.raise_for_status()
-
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(resp.text)
-
-        print(f"[OK] Zapisano plik: {filename}")
-        return filename
-    except (requests.RequestException, DownloadError) as e:
-        print(f"[ERROR] {e}")
-        return ""
-
-
 # ===== Ćwiczenie III i IV – ETL z dekoratorem =====
 class ETL:
     def __init__(self, input_file: str):
@@ -74,6 +76,9 @@ class ETL:
     def process(self):
         """Generator przetwarzający każdą linijkę: suma, średnia, brakujące wartości."""
         for row in self.read_rows():
+            if not row or not row[0].strip():
+                continue  
+
             idx = int(row[0])
             values = row[1:]
             missing = [i + 1 for i, v in enumerate(values) if v.strip() in ("", "-")]
@@ -102,6 +107,9 @@ class ETL:
 # ===== Uruchomienie programu =====
 if __name__ == "__main__":
     url = "https://oleksandr-fedoruk.com/wp-content/uploads/2025/10/sample.csv"
+    #url = "https://mock.httpstatus.io/403"
+    #url = "https://mock.httpstatus.io/404"
+
     filename = download_csv(url, "latest.csv")
     if filename:
         ETL(filename).save()
